@@ -53,11 +53,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Log.d("Bitcoin", "" + parent.getItemAtPosition(position));
-                letsDoSomeNetworking(BASE_URL);
+                String finalUrl = BASE_URL + parent.getItemAtPosition(position);
+                Log.d("Bitcoin", "Final URL is: " + finalUrl);
+                letsDoSomeNetworking(finalUrl);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+                Log.d("Bitcoin", "Nothing selected");
 
             }
         });
@@ -69,14 +72,19 @@ public class MainActivity extends AppCompatActivity {
     private void letsDoSomeNetworking(String url) {
 
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get(BASE_URL, new JsonHttpResponseHandler() {
+        client.get(url, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 // called when response HTTP status is "200 OK"
                 Log.d("Bitcoin", "JSON: " + response.toString());
-                BitcoinDataModel bitcoinData = BitcoinDataModel.fromJson(response);
-                updateUI(bitcoinData);
+                try {
+                    String price = response.getString("last");
+                    mPriceTextView.setText(price);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -91,8 +99,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUI(BitcoinDataModel bitcoin) {
-        mPriceTextView.setText(bitcoin.getAsk());
-
-    }
 }
